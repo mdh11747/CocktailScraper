@@ -1,6 +1,5 @@
 package com.example;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -10,7 +9,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.jsoup.select.Evaluator.Class;
 
-public class App 
+public class CocktailScraper 
 {
     static FileWriter cocktails;
 
@@ -21,19 +20,9 @@ public class App
         for (Element spirit : spirits) {
             scrape(spirit.child(0).attr("href"));
         }
-       //scrape("https://www.liquor.com/vodka-cocktails-4779437");
-       /* cocktails.write(scrape());
-        Document doc = Jsoup.connect("https://en.wikipedia.org/").get();
-        System.out.println(doc.title());
-        Elements sideBar = doc.select("#n-randompage");
-        for (Element sideItem : sideBar) {
-            System.out.println(sideItem.child(0).attr("href"));
-        }
-        doc = Jsoup.connect("https://en.wikipedia.org/" + sideBar.get(0).child(0).attr("href")).get();
-        System.out.println(doc.location());*/
     }
 
-    private static void scrape(String sUrl) {
+    public static void scrape(String sUrl) {
         try {
             cocktails = new FileWriter("Cocktails.txt",true);
         } catch (IOException e1) {
@@ -51,7 +40,9 @@ public class App
                     String title = doc.select(new Class("heading__title")).get(0).text();
                     Elements ingredients = doc.select(new Class("simple-list__item js-checkbox-trigger ingredient text-passage"));
                     Elements instructions = doc.select("#mntl-sc-block_3-0");
-                    if (ingredients.size() == 0) {
+                    Element image = doc.select(new Class("figure__media js-figure-media figure__media--square ")).get(0);
+                    System.out.println(image.child(0).absUrl("src"));
+                    /*if (ingredients.size() == 0) {
                         ingredients = doc.select(new Class("structured-ingredients__list-item"));
                     }
                     if (ingredients.size() > 0) {
@@ -66,7 +57,7 @@ public class App
                             }
                         }
 
-                    }
+                    }*/
                 }
 
                 cocktails.write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" +
