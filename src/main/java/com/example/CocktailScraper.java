@@ -40,8 +40,8 @@ public class CocktailScraper
                     String title = doc.select(new Class("heading__title")).get(0).text();
                     Elements ingredients = doc.select(new Class("simple-list__item js-checkbox-trigger ingredient text-passage"));
                     Elements instructions = doc.select("#mntl-sc-block_3-0");
-                    Element image = doc.select(new Class("figure__media js-figure-media figure__media--square ")).get(0);
-                    System.out.println(image.child(0).absUrl("src"));
+                    Element image = doc.select("img").get(0);
+                    System.out.println(image.attr("src"));
                     /*if (ingredients.size() == 0) {
                         ingredients = doc.select(new Class("structured-ingredients__list-item"));
                     }
