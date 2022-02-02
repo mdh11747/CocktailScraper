@@ -73,7 +73,21 @@ public class CocktailApp extends Application {
         primaryStage.show();
     }
 
-    
+    private void searchByIngredients() {
+        try {
+            Scanner cocktails = new Scanner(new File("Cocktails.txt"));
+            String nextLine, Title;
+            while (cocktails.hasNextLine()) {
+                nextLine = cocktails.nextLine();
+                
+            }
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
+
     private void randomDrink() {
         int spiritNumber = (int)(Math.random() * 10 + 1);
         try{
