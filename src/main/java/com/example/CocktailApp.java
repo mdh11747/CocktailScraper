@@ -91,7 +91,7 @@ public class CocktailApp extends Application {
     private void randomDrink() {
         int spiritNumber = (int)(Math.random() * 10 + 1);
         try{
-            Scanner cocktails = new Scanner(new File("Cocktails.txt"));
+            Scanner cocktails = new Scanner(new File("Cocktails.txt"),"UTF-8");
             while (cocktails.hasNextLine()) {
                 String nextLine = cocktails.nextLine();
                 boolean next = nextLine.contains("Spirit" + spiritNumber);
@@ -111,7 +111,7 @@ public class CocktailApp extends Application {
                 }
             }
             int drinkNumber = (int)(Math.random() * numberOfDrinks + 1);
-            cocktails = new Scanner(new File("Cocktails.txt"));
+            cocktails = new Scanner(new File("Cocktails.txt"),"UTF-8");
             while (cocktails.hasNextLine()) {
                 String nextLine = cocktails.nextLine();
                 boolean next = nextLine.contains("Spirit" + spiritNumber);
@@ -145,7 +145,7 @@ public class CocktailApp extends Application {
                 }
             }
             cocktails.close();
-            System.out.println("Done");
+            System.out.println("Random Drink Produced");
         } catch (FileNotFoundException fnfe) {
             System.err.println("File Not Found");
         }
