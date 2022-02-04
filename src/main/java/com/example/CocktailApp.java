@@ -40,6 +40,7 @@ public class CocktailApp extends Application {
         vbox = new VBox();
         ingredients = new TextField();
         searchIngredientsButton = new Button("Search by Ingredients");
+        searchIngredientsButton.setOnAction(e -> searchByIngredients());
         randomDrinkButton = new Button("Random Drink");
         randomDrinkButton.setOnAction(e -> randomDrink());
         ingredientSearch = new HBox(ingredients);
