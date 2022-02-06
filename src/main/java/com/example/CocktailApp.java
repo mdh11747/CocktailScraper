@@ -2,6 +2,8 @@ package com.example;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
 
 import javafx.application.Application;
@@ -47,13 +49,18 @@ public class CocktailApp extends Application {
         HBox.setHgrow(ingredients, Priority.ALWAYS);
 
         cocktailImage = new ImageView();
+        cocktailImage.setPreserveRatio(true);
+        cocktailImage.setFitWidth(700);
         cocktailName = new Text();
         cocktailName.setFont(new Font(40));
         ingredientsList = new Label();
+        ingredientsList.setWrapText(true);
         ingredientsList.setMinWidth(200);
+        ingredientsList.setMaxWidth(200);
         ingredientsList.setPadding(new Insets(10));
         instructions = new Label();
         instructions.setWrapText(true);
+        instructions.setMinWidth(200);
         instructions.setMaxWidth(200);
         instructions.setPadding(new Insets(10));
 
@@ -75,18 +82,100 @@ public class CocktailApp extends Application {
     }
 
     private void searchByIngredients() {
+        HashSet<String> possibleDrinks = new HashSet<>();
+        HashSet<String> validDrinks = new HashSet<>();
         try {
-            Scanner cocktails = new Scanner(new File("Cocktails.txt"));
-            String nextLine, Title;
-            while (cocktails.hasNextLine()) {
-                nextLine = cocktails.nextLine();
-                
+            File cocktailsFile = new File("Cocktails.txt");
+            Scanner cocktails;
+            String nextLine, title, ingredient;
+            String ingredientsText = ingredients.getText() + ",";
+            while (ingredientsText.length() > 0 && !Character.isLetterOrDigit((int)ingredientsText.charAt(0))) {
+                ingredientsText = ingredientsText.substring(1);
+            } if (ingredientsText.length() > 0) {
+                cocktails = new Scanner(new File("Cocktails.txt"),"UTF-8");
+                title = cocktails.nextLine();
+                while (cocktails.hasNextLine()) {
+                    nextLine = cocktails.nextLine();
+                    if (nextLine.contains("Title")) {
+                        title = nextLine.substring(nextLine.indexOf(" ") + 1);
+                    }
+                    ingredient = ingredientsText.toLowerCase().substring(0,ingredientsText.indexOf(","));
+                    if (nextLine.toLowerCase().contains(ingredient)) {
+                        possibleDrinks.add(title);
+                    }
+                }
+                ingredient = ingredients.getText().toLowerCase().substring(ingredients.getText().indexOf(",") + 1);
+                cocktails.close();
+            }
+            while (ingredientsText.length() > 0) {
+                if (!Character.isLetterOrDigit((int)ingredientsText.charAt(0))) {
+                    ingredientsText = ingredientsText.substring(1);
+                } else {
+                    validDrinks = new HashSet<>();
+                    cocktails = new Scanner(new File("Cocktails.txt"),"UTF-8");
+                    title = cocktails.nextLine();
+                    while (cocktails.hasNextLine()) {
+                        nextLine = cocktails.nextLine();
+                        if (nextLine.contains("Title")) {
+                            title = nextLine.substring(nextLine.indexOf(" ") + 1);
+                        }
+                        ingredient = ingredientsText.toLowerCase().substring(0,ingredientsText.indexOf(","));
+                        if (nextLine.toLowerCase().contains(ingredient)) {
+                            boolean valid = possibleDrinks.add(title);
+                            if (!valid) {
+                                validDrinks.add(title);
+                            } else {
+                                possibleDrinks.remove(title);
+                            }
+                        }
+                    }
+                    ingredientsText = ingredientsText.toLowerCase().substring(ingredientsText.indexOf(",") + 1);
+                    cocktails.close();
+                    possibleDrinks = validDrinks;
+                }
             }
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        int drinkNumber = (int)(Math.random() * possibleDrinks.size());
+        String drink = (String)(possibleDrinks.toArray()[drinkNumber]);
+        System.out.println(drink);
+        try {
+            File cocktailsText = new File("Cocktails.txt");
+            Scanner cocktails = new Scanner(cocktailsText,"UTF-8");
+            while (cocktails.hasNextLine()) {
+                String nextLine = cocktails.nextLine();
+                if (nextLine.contains("Title") && nextLine.contains(drink)) {
+                    break;
+                }
+            }
+            cocktailName.setText(drink);
+            ingredientsList.setText("");
+            instructions.setText("");
+            while (cocktails.hasNextLine()) {
+                String nextLine = cocktails.nextLine();
+                if (nextLine.contains("Ingredient")) {
+                    ingredientsList.setText(ingredientsList.getText() + nextLine.substring(nextLine.indexOf(" ") + 1) + "\n");
+                }
+                if (nextLine.contains("Instruction")) {
+                    instructions.setText(instructions.getText() + nextLine.substring(nextLine.indexOf(" ") + 1) + "\n");
+                }
+                if (nextLine.contains("Image")) {
+                    cocktailImage.setImage(new Image(nextLine.substring(nextLine.indexOf(" ") + 1)));
+                }
+                if (nextLine.contains("Title") || nextLine.contains("~")) {
+                    break;
+                }
+            }
+            cocktails.close();
+            ingredientsList.setText(ingredientsList.getText() + "1 shot of Joey's cum");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void searchByTitle() {
+        String title = ingredients.getText();
     }
 
     private void randomDrink() {
@@ -146,12 +235,11 @@ public class CocktailApp extends Application {
                 }
             }
             cocktails.close();
+            ingredientsList.setText(ingredientsList.getText() + "1 shot of Joey's cum");
             System.out.println("Random Drink Produced");
         } catch (FileNotFoundException fnfe) {
             System.err.println("File Not Found");
         }
-    }
-
-    
+    }    
 
 }
