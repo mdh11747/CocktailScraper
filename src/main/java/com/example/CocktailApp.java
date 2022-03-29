@@ -3,9 +3,17 @@ package com.example;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Scanner;
+
+import javax.crypto.spec.GCMParameterSpec;
+import javax.imageio.ImageIO;
+
+import java.awt.image.BufferedImage;
+
+import java.net.URL;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -27,6 +35,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.text.TextBoundsType;
 import javafx.stage.Stage;
 import javafx.geometry.Insets;
 
@@ -35,6 +45,7 @@ public class CocktailApp extends Application {
     VBox vbox;
     TextField ingredients;
     Button searchIngredientsButton;
+    Button searchTitleButton;
     Button randomDrinkButton;
     HBox ingredientSearch;
     HBox cocktailInfo;
@@ -47,41 +58,53 @@ public class CocktailApp extends Application {
 
     @Override
     public void init() {
-        vbox = new VBox();
+        com.apple.eawt.Application application = com.apple.eawt.Application.getApplication();
+        BufferedImage image;
         try {
-            vbox.setBackground(new Background(new BackgroundImage(new Image(new FileInputStream(new File("WoodBackground.png"))),
-                                BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,BackgroundSize.DEFAULT)));
-        } catch (FileNotFoundException e1) {
+            image = ImageIO.read(new File("CocktailArt.png"));
+            application.setDockIconImage(image);
+        } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
+
+        vbox = new VBox();
+            vbox.setBackground(new Background(new BackgroundImage(new Image("File:WoodBackground.png"),
+                                BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,BackgroundSize.DEFAULT)));
         ingredients = new TextField();
         searchIngredientsButton = new Button("Search by Ingredients");
         searchIngredientsButton.setOnAction(e -> searchByIngredients());
+        searchTitleButton = new Button("Search by Title");
+        searchTitleButton.setOnAction(e -> searchByTitle());
         randomDrinkButton = new Button("Random Drink");
         randomDrinkButton.setOnAction(e -> randomDrink());
         ingredientSearch = new HBox(ingredients);
         HBox.setHgrow(ingredients, Priority.ALWAYS);
-
+        
         cocktailImage = new ImageView();
         cocktailImage.setPreserveRatio(true);
         cocktailImage.setFitWidth(700);
         cocktailName = new Text();
-        cocktailName.setFont(new Font(40));
+        cocktailName.setFill(Color.WHITE);
+        cocktailName.setFont(new Font(60));
+        cocktailName.setWrappingWidth(cocktailImage.getFitWidth());
+        cocktailName.setTextAlignment(TextAlignment.CENTER);
         ingredientsList = new Label();
-        ingredientsList.setTextFill(Color.SKYBLUE);
+        ingredientsList.setTextFill(Color.WHITE);
         ingredientsList.setWrapText(true);
         ingredientsList.setMinWidth(200);
         ingredientsList.setMaxWidth(200);
         ingredientsList.setPadding(new Insets(10));
         instructions = new Label();
+        instructions.setTextFill(Color.WHITE);
         instructions.setWrapText(true);
         instructions.setMinWidth(200);
         instructions.setMaxWidth(200);
         instructions.setPadding(new Insets(10));
 
         randomDrinkButton.setMaxWidth(Double.MAX_VALUE);
-        searchOptions = new VBox(searchIngredientsButton,randomDrinkButton);
+        searchTitleButton.setMaxWidth(Double.MAX_VALUE);
+        searchOptions = new VBox(searchIngredientsButton,searchTitleButton,randomDrinkButton);
         ingredientSearch.getChildren().add(searchOptions);
 
         cocktailInfo = new HBox(cocktailImage,ingredientsList,instructions);
@@ -90,10 +113,12 @@ public class CocktailApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-
         Scene scene = new Scene(vbox,1150,1002);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Gimme Drink");
+        Image applicationIcon;
+        applicationIcon = new Image("File:CocktailArt.png");
+        primaryStage.getIcons().add(applicationIcon);
         primaryStage.show();
     }
 
@@ -165,14 +190,48 @@ public class CocktailApp extends Application {
             System.out.println(drink);
             cocktailName.setText(drink);
             updateInfo(cocktails);
-            ingredientsList.setText(ingredientsList.getText() + "1 shot of Joey's cum");
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("File Not Found");
+        } catch (ArrayIndexOutOfBoundsException aioobe) {
+            resetImage();
         }
     }
 
     private void searchByTitle() {
-        String title = ingredients.getText();
+        String title = ingredients.getText().toLowerCase();
+        while (title.length() > 0) {
+            if (!Character.isLetterOrDigit((int)title.charAt(0))) {
+                title = title.substring(1);
+            } else {
+                break;
+            }
+        }
+        if (title.length() > 0) {
+            try {
+                ArrayList<String> possibleDrinks = new ArrayList<>();
+                Scanner cocktails = new Scanner(new File("Cocktails.txt"),"UTF-8");
+                while (cocktails.hasNextLine()) {
+                    String line = cocktails.nextLine();
+                    if (line.contains("Title") && line.toLowerCase().contains(title)) {
+                        possibleDrinks.add(line.substring(0,line.indexOf(":")));
+                    }
+                }
+                if (possibleDrinks.size() == 0) {
+                    resetImage();
+                } else {
+                    int drinkNumber = (int)(Math.random() * possibleDrinks.size());
+                    while (cocktails.hasNextLine()) {
+                        String line = cocktails.nextLine();
+                        if (line.contains(""));
+                    }
+                }
+                cocktails.close();
+            } catch (FileNotFoundException e) {
+                System.out.println("File Not Found");
+            } catch (ArrayIndexOutOfBoundsException aioobe) {
+                resetImage();
+            }
+        }
     }
 
     private void randomDrink() {
@@ -215,7 +274,6 @@ public class CocktailApp extends Application {
                 }
             }
             updateInfo(cocktails);
-            ingredientsList.setText(ingredientsList.getText() + "1 shot of Joey's cum");
             System.out.println("Random Drink Produced");
         } catch (FileNotFoundException fnfe) {
             System.err.println("File Not Found");
@@ -241,6 +299,14 @@ public class CocktailApp extends Application {
             }
         }
         input.close();
+//        ingredientsList.setText(ingredientsList.getText() + "1 shot of Joey's cum");
+    }
+
+    private void resetImage() {
+        cocktailImage.setImage(new Image("File:blank.png"));
+        ingredientsList.setText("");
+        instructions.setText("");
+        cocktailName.setText("No Results");
     }
 
 }
